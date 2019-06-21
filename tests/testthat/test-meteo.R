@@ -1,0 +1,22 @@
+context("meteo")
+y <-  2018
+
+test_that("meteo works!", {
+  x <- meteo("hourly", "synop", year = y)
+  x <- meteo("hourly", "climate", year = y)
+  x <- meteo("hourly", "precip", year = y)
+  x <- meteo("daily", "synop", year = y)
+  x <- meteo("daily", "climate", year = y)
+  x <- meteo("daily", "precip", year = y)
+  x <- meteo("monthly", "synop", year = y)
+  x <- meteo("monthly", "climate", year = y)
+  x <- meteo("monthly", "precip", year = y)
+  x <- meteo("monthly", "synop", year = y, status = TRUE)
+  x <- meteo("monthly", "synop", year = y, coords = TRUE)
+  x <- meteo("monthly", "synop", year = y, col_names = "full")
+  x <- meteo("monthly", "synop", year = y, coords = TRUE, col_names = "full")
+  x <- meteo("monthly", "synop", year = y, col_names = "polish")
+  x <- meteo("monthly", "synop", year = y, coords = TRUE, col_names = "polish")
+  x <- meteo("monthly", "synop", year = y, station = "BIAŁYSTOK")
+  x2 <- meteo("monthly", "synop", year = y, station = 353230295)
+})
