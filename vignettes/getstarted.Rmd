@@ -1,0 +1,146 @@
+---
+title: "Introduction to the imgw package (EN)"
+author: "Bartosz Czernecki, Arkadiusz Głogowski, Jakub Nowosad"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{introduction-to-the-imgw-package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(imgw)
+library(tidyr)
+library(dplyr)
+options(scipen=999)
+```
+
+The main goal of the **imgw** package is to give convenient and programmable access to the Polish database of the archive meteorological and hydrological measurements.
+
+It consists of tools that are:
+
+- Giving more accessible access to the public data stored in the Institute of Meteorology and Water Management ([IMGW](https://dane.imgw.pl/))
+- Downloading the selected data from among eleven different forms of data depending on the interval and the data type
+- Providing the description of the parameters in two languages: Polish and English, as well as in the abbreviated form
+<!--co jeszcze>-->
+
+## Functions 
+
+The **imgw** package consists of nine main functions - four for meteorological data, four for hydrological data and one for sounding meteo:
+
+1. Meteorological data:
+
+- `meteo_hourly()` - downloading meteorological the data with hourly interval 
+- `meteo_daily()` - downloading meteorological the data with daily interval 
+- `meteo_monthly()` - downloading meteorological the data with monthly interval 
+- `meteo()` - downloading meteorological the data with interval the user want to choose 
+
+2. Hydrological data: 
+
+- `hydro()` - downloading hydrological the data with interval the user want to choose
+- `hydro_daily()` - downloading hydrological the data with daily interval
+- `hydro_monthly()` - downloading hyrological the data with monthly interval
+- `hydro_annual()` - downloading hyrological the data with annual interval
+
+3. Rawinsonde data: 
+
+- `meteo_sounding()` -- downloading rawinsonde data (+metadata)
+
+Most of the functions mentioned above have similar arguments allowing to choose:
+
+- `rank` - type of the stations `"synop"`, `"climate"`, `"precip"` (**only meteo functions**)
+- `year` - vector of selected years (e.g., `1966:2000`)
+- `status` - logical argument TRUE or FALSE; if TRUE the measurement statuses will be erased (**only meteo functions**)
+- `coords` - logical argument TRUE or FALSE; if TRUE the coordinates are added to the stations
+- `station` - selection of the stations; it can be the ID of stations (numeric) or name of the station (**CAPITAL LETTERS** (character))
+- `col_names` - format of the columns names; three types of column names are possible: `"short"` - default, values with shorten names, `"full"` - full English description, `"polish"` - original names in the dataset
+
+## Database
+
+**imgw** also has a few additional databases:
+
+- `hydro_abberv`/`meteo_abberv` - a dictionary containing all original descriptions of parameters in both languages and the abbreviations
+
+```{r abberv,echo=FALSE}
+abbev = meteo_abbrev
+head(abbev)
+```
+
+- `hydro_stations`/`meteo_stations` - datasets of almost all meteorological/hydrological stations containing their ID, latitude, and longitude
+
+```{r station,echo=FALSE}
+station = meteo_stations
+head(station)
+```
+
+## Application
+
+We will show how to use our package and prepare the data for spatial analysis with the additional help of the [dplyr](https://cran.r-project.org/package=dplyr) and [tidyr](https://cran.r-project.org/package=tidyr) packages.
+Firstly, we download ten years (**2001-2010**) of monthly hydrological observations for all stations available and automatically add their spatial coordinates. 
+
+```{r data, echo = FALSE}
+h = hydro_monthly(year = 2001:2010, coords = TRUE)
+head(h)
+```
+
+The `idex` variable represents id of the extremum, where `1` means minimum, `2` mean, and `3` maximum.^[You can find more information about this in the `hydro_abbrev` dataset.]
+Hydrologists often use the maximum value so we will filter the data and select only the station `id`, hydrological year (`hyy`), latitude `X` and longitude `Y`.
+Next, we will calculate the mean maximum value of the flow on the stations in each year with **dplyr**'s `summarise()`, and spread data by year using **tidyr**'s `spread()` to get the annual means of maximum flow in the consecutive columns.
+
+
+```{r filtering, eval=TRUE, include=TRUE}
+h2 = h %>%
+  filter(idex == 3) %>%
+  select(id, station, X, Y, hyy, Q) %>%
+  group_by(hyy, id, station, X, Y) %>%
+  summarise(srednie_roczne_Q = round(mean(Q, na.rm = TRUE),1)) %>% 
+  spread(hyy, srednie_roczne_Q)
+```
+
+```{r filtering2, echo=FALSE}
+library(knitr)
+kable(head(h2), caption = "Examplary data frame of hydrological preprocesssing.")
+```
+
+<!-- The resulting table can be easily exported to any spatial software with a changing annual maximum annual average water flow rate over the decade for Poland as a whole. -->
+The result represent changing annual maximum average of water flow rate over the decade for all available stations in Poland. 
+We can save it to:
+
+- `.csv` with: `write.csv(result, file = "result.csv", sep = ";",dec = ".", col.names = T, row.names = F)`. 
+This command saves our result to `result.csv` where the column's separator is `;`, the decimal is `.`, we are keeping the headers of columns and remove names of rows which are simply numbers of observation.
+
+- `.xlsx` with: `write.xlsx(result, file = "result.xlsx", sheetName = "Poland", append = FALSE)`
+This command saves our result to result.xlsx with the name of the sheet `Poland`. Argument `append=TRUE` add the sheet to already existing `xlsx` file.
+To save data in `.xlsx` you have first to install package with command: `install.packages("writexl")`, and add it: `library(writexl)`.
+ 
+<!-- dodatkowo można pokazać jak zapisać wynik do formatu teskstowego/excela/przestrzennego -->
+<!-- nie umiem zapisać do formatu przestrzennego -->
+
+```{r, eval=FALSE, include=TRUE}
+library(sf)
+library(tmap)
+library(rnaturalearth)
+library(rnaturalearthdata)
+world = ne_countries(scale = "medium", returnclass = "sf")
+
+h3 = h2 %>% 
+  filter(!is.na(X)) %>% 
+  st_as_sf(coords = c("X", "Y"))
+
+tm_shape(h3) + 
+  tm_symbols(size = as.character(c(2001:2010)),
+             title.size = "Średni przepływ maksymalny") +
+  tm_facets(free.scales = FALSE, ncol = 4) + 
+  tm_shape(world) + 
+  tm_borders(col = "black", lwd = 2) +
+  tm_layout(legend.position = c(-1.25, 0.05),
+            outer.margins = c(0, 0.05, 0, -0.25),
+            panel.labels = as.character(c(2001:2010)))
+```
+
+<!-- ![Mean maximum annual flow](../../docs/articles/articles/pl_files/figure-html/unnamed-chunk-1-1.png) -->

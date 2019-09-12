@@ -1,4 +1,4 @@
-#' Hydrological data
+#' Hydrological data from IMGW
 #'
 #' Downloading hourly, daily, and monthly hydrological data from the SYNOP / CLIMATE / PRECIP stations available in the danepubliczne.imgw.pl collection
 #'

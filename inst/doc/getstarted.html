@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Bartosz Czernecki, Arkadiusz Głogowski, Jakub Nowosad" />
+
+<meta name="date" content="2019-09-12" />
+
+<title>Introduction to the imgw package (EN)</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to the imgw package (EN)</h1>
+<h4 class="author">Bartosz Czernecki, Arkadiusz Głogowski, Jakub Nowosad</h4>
+<h4 class="date">2019-09-12</h4>
+
+
+
+<p>The main goal of the <strong>imgw</strong> package is to give convenient and programmable access to the Polish database of the archive meteorological and hydrological measurements.</p>
+<p>It consists of tools that are:</p>
+<ul>
+<li>Giving more accessible access to the public data stored in the Institute of Meteorology and Water Management (<a href="https://dane.imgw.pl/">IMGW</a>)</li>
+<li>Downloading the selected data from among eleven different forms of data depending on the interval and the data type</li>
+<li>Providing the description of the parameters in two languages: Polish and English, as well as in the abbreviated form <!--co jeszcze>--></li>
+</ul>
+<div id="functions" class="section level2">
+<h2>Functions</h2>
+<p>The <strong>imgw</strong> package consists of nine main functions - four for meteorological data, four for hydrological data and one for sounding meteo:</p>
+<ol style="list-style-type: decimal">
+<li>Meteorological data:</li>
+</ol>
+<ul>
+<li><code>meteo_hourly()</code> - downloading meteorological the data with hourly interval</li>
+<li><code>meteo_daily()</code> - downloading meteorological the data with daily interval</li>
+<li><code>meteo_monthly()</code> - downloading meteorological the data with monthly interval</li>
+<li><code>meteo()</code> - downloading meteorological the data with interval the user want to choose</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>Hydrological data:</li>
+</ol>
+<ul>
+<li><code>hydro()</code> - downloading hydrological the data with interval the user want to choose</li>
+<li><code>hydro_daily()</code> - downloading hydrological the data with daily interval</li>
+<li><code>hydro_monthly()</code> - downloading hyrological the data with monthly interval</li>
+<li><code>hydro_annual()</code> - downloading hyrological the data with annual interval</li>
+</ul>
+<ol start="3" style="list-style-type: decimal">
+<li>Rawinsonde data:</li>
+</ol>
+<ul>
+<li><code>meteo_sounding()</code> – downloading rawinsonde data (+metadata)</li>
+</ul>
+<p>Most of the functions mentioned above have similar arguments allowing to choose:</p>
+<ul>
+<li><code>rank</code> - type of the stations <code>&quot;synop&quot;</code>, <code>&quot;climate&quot;</code>, <code>&quot;precip&quot;</code> (<strong>only meteo functions</strong>)</li>
+<li><code>year</code> - vector of selected years (e.g., <code>1966:2000</code>)</li>
+<li><code>status</code> - logical argument TRUE or FALSE; if TRUE the measurement statuses will be erased (<strong>only meteo functions</strong>)</li>
+<li><code>coords</code> - logical argument TRUE or FALSE; if TRUE the coordinates are added to the stations</li>
+<li><code>station</code> - selection of the stations; it can be the ID of stations (numeric) or name of the station (<strong>CAPITAL LETTERS</strong> (character))</li>
+<li><code>col_names</code> - format of the columns names; three types of column names are possible: <code>&quot;short&quot;</code> - default, values with shorten names, <code>&quot;full&quot;</code> - full English description, <code>&quot;polish&quot;</code> - original names in the dataset</li>
+</ul>
+</div>
+<div id="database" class="section level2">
+<h2>Database</h2>
+<p><strong>imgw</strong> also has a few additional databases:</p>
+<ul>
+<li><code>hydro_abberv</code>/<code>meteo_abberv</code> - a dictionary containing all original descriptions of parameters in both languages and the abbreviations</li>
+</ul>
+<pre><code>#&gt;                               fullname   abbr_eng
+#&gt; 1 Absolutna temperatura maksymalna [C]   tmax_abs
+#&gt; 2  Absolutna temperatura minimalna [C]   tmin_abs
+#&gt; 3                 Aktynometria [J/cm2]      irrad
+#&gt; 4      Charakterystyka tendencji [kod] press_tend
+#&gt; 5                      Chmury CH [kod] cl_CH_code
+#&gt; 6                    Chmury CH tekstem      cl_CH
+#&gt;                           fullname_eng
+#&gt; 1 Absolute maximum air temperature [C]
+#&gt; 2 Absolute minimum air temperature [C]
+#&gt; 3                   Irradiance [J/cm2]
+#&gt; 4                    Pressure tendency
+#&gt; 5              High cloud cover [code]
+#&gt; 6              High cloud cover [text]</code></pre>
+<ul>
+<li><code>hydro_stations</code>/<code>meteo_stations</code> - datasets of almost all meteorological/hydrological stations containing their ID, latitude, and longitude</li>
+</ul>
+<pre><code>#&gt; # A tibble: 6 x 3
+#&gt;          id     X     Y
+#&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1 249190020  19.6  50.0
+#&gt; 2 249199999  19.3  49.9
+#&gt; 3 249190040  19.4  49.9
+#&gt; 4 249190050  19.8  49.9
+#&gt; 5 249190060  20.0  49.9
+#&gt; 6 249190070  19.2  49.9</code></pre>
+</div>
+<div id="application" class="section level2">
+<h2>Application</h2>
+<p>We will show how to use our package and prepare the data for spatial analysis with the additional help of the <a href="https://cran.r-project.org/package=dplyr">dplyr</a> and <a href="https://cran.r-project.org/package=tidyr">tidyr</a> packages. Firstly, we download ten years (<strong>2001-2010</strong>) of monthly hydrological observations for all stations available and automatically add their spatial coordinates.</p>
+<pre><code>#&gt;              id       X        Y station riv_or_lake  hyy idhyy idex   H
+#&gt; 95158 150210180 21.8335 50.88641 ANNOPOL   Wisła (2) 2001     1    1 214
+#&gt; 95159 150210180 21.8335 50.88641 ANNOPOL   Wisła (2) 2001     1    2 228
+#&gt; 95160 150210180 21.8335 50.88641 ANNOPOL   Wisła (2) 2001     1    3 250
+#&gt; 95161 150210180 21.8335 50.88641 ANNOPOL   Wisła (2) 2001     2    1 215
+#&gt; 95162 150210180 21.8335 50.88641 ANNOPOL   Wisła (2) 2001     2    2 225
+#&gt; 95163 150210180 21.8335 50.88641 ANNOPOL   Wisła (2) 2001     2    3 258
+#&gt;         Q  T mm
+#&gt; 95158 172 NA 11
+#&gt; 95159 207 NA 11
+#&gt; 95160 272 NA 11
+#&gt; 95161 174 NA 12
+#&gt; 95162 201 NA 12
+#&gt; 95163 297 NA 12</code></pre>
+<p>The <code>idex</code> variable represents id of the extremum, where <code>1</code> means minimum, <code>2</code> mean, and <code>3</code> maximum.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> Hydrologists often use the maximum value so we will filter the data and select only the station <code>id</code>, hydrological year (<code>hyy</code>), latitude <code>X</code> and longitude <code>Y</code>. Next, we will calculate the mean maximum value of the flow on the stations in each year with <strong>dplyr</strong>’s <code>summarise()</code>, and spread data by year using <strong>tidyr</strong>’s <code>spread()</code> to get the annual means of maximum flow in the consecutive columns.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">h2 =<span class="st"> </span>h <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(idex <span class="op">==</span><span class="st"> </span><span class="dv">3</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="st">  </span><span class="kw">select</span>(id, station, X, Y, hyy, Q) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="st">  </span><span class="kw">group_by</span>(hyy, id, station, X, Y) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">srednie_roczne_Q =</span> <span class="kw">round</span>(<span class="kw">mean</span>(Q, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),<span class="dv">1</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6"><span class="st">  </span><span class="kw">spread</span>(hyy, srednie_roczne_Q)</a></code></pre></div>
+<table>
+<caption>Examplary data frame of hydrological preprocesssing.</caption>
+<thead>
+<tr class="header">
+<th align="right">id</th>
+<th align="left">station</th>
+<th align="right">X</th>
+<th align="right">Y</th>
+<th align="right">2001</th>
+<th align="right">2002</th>
+<th align="right">2003</th>
+<th align="right">2004</th>
+<th align="right">2005</th>
+<th align="right">2006</th>
+<th align="right">2007</th>
+<th align="right">2008</th>
+<th align="right">2009</th>
+<th align="right">2010</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">149180010</td>
+<td align="left">KRZYŻANOWICE</td>
+<td align="right">18.28780</td>
+<td align="right">49.99301</td>
+<td align="right">200.5</td>
+<td align="right">147.4</td>
+<td align="right">87.9</td>
+<td align="right">109.2</td>
+<td align="right">170.6</td>
+<td align="right">226.9</td>
+<td align="right">152.9</td>
+<td align="right">131.0</td>
+<td align="right">160.9</td>
+<td align="right">461.1</td>
+</tr>
+<tr class="even">
+<td align="right">149180020</td>
+<td align="left">CHAŁUPKI</td>
+<td align="right">18.32752</td>
+<td align="right">49.92127</td>
+<td align="right">174.7</td>
+<td align="right">96.7</td>
+<td align="right">57.6</td>
+<td align="right">91.8</td>
+<td align="right">146.9</td>
+<td align="right">170.6</td>
+<td align="right">110.2</td>
+<td align="right">101.6</td>
+<td align="right">124.7</td>
+<td align="right">314.6</td>
+</tr>
+<tr class="odd">
+<td align="right">149180040</td>
+<td align="left">GOŁKOWICE</td>
+<td align="right">18.49640</td>
+<td align="right">49.92579</td>
+<td align="right">4.5</td>
+<td align="right">2.0</td>
+<td align="right">1.7</td>
+<td align="right">1.7</td>
+<td align="right">2.5</td>
+<td align="right">3.3</td>
+<td align="right">2.1</td>
+<td align="right">1.7</td>
+<td align="right">2.2</td>
+<td align="right">8.6</td>
+</tr>
+<tr class="even">
+<td align="right">149180050</td>
+<td align="left">ZEBRZYDOWICE</td>
+<td align="right">18.61326</td>
+<td align="right">49.88025</td>
+<td align="right">13.5</td>
+<td align="right">7.9</td>
+<td align="right">3.8</td>
+<td align="right">5.0</td>
+<td align="right">10.4</td>
+<td align="right">6.5</td>
+<td align="right">5.8</td>
+<td align="right">2.8</td>
+<td align="right">4.5</td>
+<td align="right">23.6</td>
+</tr>
+<tr class="odd">
+<td align="right">149180060</td>
+<td align="left">CIESZYN</td>
+<td align="right">18.62972</td>
+<td align="right">49.74616</td>
+<td align="right">57.2</td>
+<td align="right">57.7</td>
+<td align="right">29.8</td>
+<td align="right">26.8</td>
+<td align="right">65.4</td>
+<td align="right">60.7</td>
+<td align="right">54.7</td>
+<td align="right">33.0</td>
+<td align="right">34.7</td>
+<td align="right">135.0</td>
+</tr>
+<tr class="even">
+<td align="right">149180070</td>
+<td align="left">CIESZYN</td>
+<td align="right">18.63137</td>
+<td align="right">49.74629</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">0.6</td>
+<td align="right">0.5</td>
+<td align="right">0.6</td>
+<td align="right">0.6</td>
+</tr>
+</tbody>
+</table>
+<!-- The resulting table can be easily exported to any spatial software with a changing annual maximum annual average water flow rate over the decade for Poland as a whole. -->
+<p>The result represent changing annual maximum average of water flow rate over the decade for all available stations in Poland. We can save it to:</p>
+<ul>
+<li><p><code>.csv</code> with: <code>write.csv(result, file = &quot;result.csv&quot;, sep = &quot;;&quot;,dec = &quot;.&quot;, col.names = T, row.names = F)</code>. This command saves our result to <code>result.csv</code> where the column’s separator is <code>;</code>, the decimal is <code>.</code>, we are keeping the headers of columns and remove names of rows which are simply numbers of observation.</p></li>
+<li><p><code>.xlsx</code> with: <code>write.xlsx(result, file = &quot;result.xlsx&quot;, sheetName = &quot;Poland&quot;, append = FALSE)</code> This command saves our result to result.xlsx with the name of the sheet <code>Poland</code>. Argument <code>append=TRUE</code> add the sheet to already existing <code>xlsx</code> file. To save data in <code>.xlsx</code> you have first to install package with command: <code>install.packages(&quot;writexl&quot;)</code>, and add it: <code>library(writexl)</code>.</p></li>
+</ul>
+<!-- dodatkowo można pokazać jak zapisać wynik do formatu teskstowego/excela/przestrzennego -->
+<!-- nie umiem zapisać do formatu przestrzennego -->
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">library</span>(sf)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw">library</span>(tmap)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw">library</span>(rnaturalearth)</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="kw">library</span>(rnaturalearthdata)</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">world =<span class="st"> </span><span class="kw">ne_countries</span>(<span class="dt">scale =</span> <span class="st">&quot;medium&quot;</span>, <span class="dt">returnclass =</span> <span class="st">&quot;sf&quot;</span>)</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7">h3 =<span class="st"> </span>h2 <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="st">  </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">is.na</span>(X)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-9" data-line-number="9"><span class="st">  </span><span class="kw">st_as_sf</span>(<span class="dt">coords =</span> <span class="kw">c</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>))</a>
+<a class="sourceLine" id="cb5-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb5-11" data-line-number="11"><span class="kw">tm_shape</span>(h3) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-12" data-line-number="12"><span class="st">  </span><span class="kw">tm_symbols</span>(<span class="dt">size =</span> <span class="kw">as.character</span>(<span class="kw">c</span>(<span class="dv">2001</span><span class="op">:</span><span class="dv">2010</span>)),</a>
+<a class="sourceLine" id="cb5-13" data-line-number="13">             <span class="dt">title.size =</span> <span class="st">&quot;Średni przepływ maksymalny&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb5-14" data-line-number="14"><span class="st">  </span><span class="kw">tm_facets</span>(<span class="dt">free.scales =</span> <span class="ot">FALSE</span>, <span class="dt">ncol =</span> <span class="dv">4</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-15" data-line-number="15"><span class="st">  </span><span class="kw">tm_shape</span>(world) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-16" data-line-number="16"><span class="st">  </span><span class="kw">tm_borders</span>(<span class="dt">col =</span> <span class="st">&quot;black&quot;</span>, <span class="dt">lwd =</span> <span class="dv">2</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb5-17" data-line-number="17"><span class="st">  </span><span class="kw">tm_layout</span>(<span class="dt">legend.position =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">1.25</span>, <span class="fl">0.05</span>),</a>
+<a class="sourceLine" id="cb5-18" data-line-number="18">            <span class="dt">outer.margins =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.05</span>, <span class="dv">0</span>, <span class="fl">-0.25</span>),</a>
+<a class="sourceLine" id="cb5-19" data-line-number="19">            <span class="dt">panel.labels =</span> <span class="kw">as.character</span>(<span class="kw">c</span>(<span class="dv">2001</span><span class="op">:</span><span class="dv">2010</span>)))</a></code></pre></div>
+<!-- ![Mean maximum annual flow](../../docs/articles/articles/pl_files/figure-html/unnamed-chunk-1-1.png) -->
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>You can find more information about this in the <code>hydro_abbrev</code> dataset.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

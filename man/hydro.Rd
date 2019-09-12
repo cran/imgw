@@ -2,7 +2,7 @@
 % Please edit documentation in R/hydro.R
 \name{hydro}
 \alias{hydro}
-\title{Hydrological data}
+\title{Hydrological data from IMGW}
 \usage{
 hydro(interval, year, coords = FALSE, value = "H", station = NULL,
   col_names = "short", ...)

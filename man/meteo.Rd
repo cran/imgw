@@ -2,7 +2,7 @@
 % Please edit documentation in R/meteo.R
 \name{meteo}
 \alias{meteo}
-\title{Meteorological data}
+\title{Meteorological data from IMGW}
 \usage{
 meteo(interval, rank, year, status = FALSE, coords = FALSE,
   station = NULL, col_names = "short", ...)
