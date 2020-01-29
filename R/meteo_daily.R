@@ -6,8 +6,8 @@
 #' @param year vector of years (e.g., 1966:2000)
 #' @param status leave the columns with measurement and observation statuses (default status = FALSE - i.e. the status columns are deleted)
 #' @param coords add coordinates of the station (logical value TRUE or FALSE)
-#' @param station name or ID of meteorological station(s).
-#' It accepts names (characters in CAPITAL LETTERS) or stations' IDs (numeric)
+#' @param station name of meteorological station(s).
+#' It accepts names (characters in CAPITAL LETTERS); stations' IDs (numeric) are no longer valid
 #' @param col_names three types of column names possible: "short" - default, values with shorten names, "full" - full English description, "polish" - original names in the dataset
 #' @param ... other parameters that may be passed to the 'shortening' function that shortens column names
 #' @importFrom RCurl getURL
@@ -81,13 +81,24 @@ meteo_daily <- function(rank, year, status = FALSE, coords = FALSE, station = NU
         }
 
         unlink(c(temp, temp2))
-        all_data[[length(all_data) + 1]] <- merge(data1, data2, by = c("Kod stacji",  "Rok", "Miesiac", "Dzien"), all.x = TRUE)
+
+        # moja proba z obejsciem dla wyboru kodu
+        ttt = merge(data1, data2, by = c("Kod stacji",  "Rok", "Miesiac", "Dzien"), all.x = TRUE)
+        ttt = ttt[order(ttt$`Nazwa stacji.x`, ttt$Rok, ttt$Miesiac, ttt$Dzien),]
+
+        if (!is.null(station)) {
+          all_data[[length(all_data) + 1]] = ttt[ttt$`Nazwa stacji.x` %in% station,]
+        } else {
+          all_data[[length(all_data) + 1]] <- ttt
+        }
+        # koniec proby z obejsciem
+
       } # koniec petli po zipach do pobrania
 
     } # koniec if'a dla synopa
 
-######################
-###### KLIMAT: #######
+    ######################
+    ###### KLIMAT: #######
     if(rank == "climate") {
       address <- paste0(base_url, "dane_meteorologiczne/dobowe/klimat",
                         "/", catalog, "/")
@@ -120,8 +131,8 @@ meteo_daily <- function(rank, year, status = FALSE, coords = FALSE, station = NU
 
         unlink(c(temp, temp2))
         all_data[[length(all_data)+1]] <- merge(data1, data2,
-                                            by = c("Kod stacji", "Rok", "Miesiac", "Dzien"),
-                                            all.x = TRUE)
+                                                by = c("Kod stacji", "Rok", "Miesiac", "Dzien"),
+                                                all.x = TRUE)
       } # koniec petli po zipach do pobrania
     } # koniec if'a dla klimatu
 
@@ -157,7 +168,7 @@ meteo_daily <- function(rank, year, status = FALSE, coords = FALSE, station = NU
     } # koniec if'a dla klimatu
 
 
-    } # koniec petli po glownych catalogach danych dobowych
+  } # koniec petli po glownych catalogach danych dobowych
 
   all_data <- do.call(rbind, all_data)
 
@@ -174,12 +185,12 @@ meteo_daily <- function(rank, year, status = FALSE, coords = FALSE, station = NU
   #station selection
   if (!is.null(station)) {
     if (is.character(station)) {
-      all_data <- all_data[all_data$id %in% station, ]
+      all_data <- all_data[all_data$`Nazwa stacji.x` %in% station, ]
       if (nrow(all_data) == 0){
         stop("Selected station(s) is not available in the database.", call. = FALSE)
       }
     } else if (is.numeric(station)){
-      all_data <- all_data[all_data$id %in% station, ]
+      all_data <- all_data[all_data$`Kod stacji` %in% station, ]
       if (nrow(all_data) == 0){
         stop("Selected station(s) is not available in the database.", call. = FALSE)
       }
@@ -188,11 +199,15 @@ meteo_daily <- function(rank, year, status = FALSE, coords = FALSE, station = NU
     }
   }
 
-  # all_data <- all_data[order(all_data$`Nazwa stacji`, all_data$`Rok`, all_data$`Miesiac`, all_data$`Dzien`), ]
-  # powyzsza linia wykrzacza pobieranie
 
-  # dodanie opcji  dla skracania kolumn i usuwania duplikatow:
+  all_data <- all_data[order(all_data$`Nazwa stacji.x`, all_data$Rok, all_data$Miesiac, all_data$Dzien),]
+  #powyzsza linia wykrzacza pobieranie
+
+
+  # # dodanie opcji  dla skracania kolumn i usuwania duplikatow:
   all_data <- meteo_shortening(all_data, col_names = col_names, ...)
+
   return(all_data)
+
 
 } # koniec funkcji meteo_daily
